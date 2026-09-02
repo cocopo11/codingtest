@@ -37,5 +37,7 @@ algorithm-study/
 
 ```text
 solve: 문제 이름
+docs: README.md 문서 수정
+chore: 폴더 구조 변경 
 ```
 
