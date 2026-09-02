@@ -15,7 +15,7 @@
 ## Directory Structure
 
 ```text
-algorithm-study/
+codingtest/
 ├── README.md
 └── programmers/
     └── level_1/
