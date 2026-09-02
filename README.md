@@ -31,7 +31,7 @@ algorithm-study/
 
 | Level   | Solved |
 | ------- | -----: |
-| Level 1 |      0 |
+| Level 1 |      2 |
 
 ## Commit 규칙
 
