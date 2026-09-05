@@ -31,7 +31,7 @@ codingtest/
 
 | Level   | Solved |
 | ------- | -----: |
-| Level 1 |      5 |
+| Level 1 |      6 |
 
 ## Commit 규칙
 
