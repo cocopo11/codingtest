@@ -18,10 +18,10 @@
 codingtest/
 ├── README.md
 └── programmers/
-    └── level_1/
+    └── Level_1/
         ├── README.md
         ├── 문제.py
-    └── level_2/
+    └── Level_2/
         ├── README.md
         ├── 문제.py
 ```
@@ -32,6 +32,7 @@ codingtest/
 | Level   | Solved |
 | ------- | -----: |
 | Level 1 |      6 |
+| Level 2 |      1 |
 
 ## Commit 규칙
 
