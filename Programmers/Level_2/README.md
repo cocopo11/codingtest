@@ -362,3 +362,147 @@ def solution(pb):
 직관적으로 확인할 수 있다.
 
 ---
+
+## 5. 가장 큰 수
+
+### 문제 접근
+
+처음에는 두 숫자를 문자열로 이어 붙였을 때 어떤 순서가 더 큰 값을 만드는지 직접 비교하는 방식으로 접근했다.
+
+두 문자열 `a`, `b`가 있을 때
+
+```python
+a + b
+b + a
+```
+
+를 비교해서 더 큰 결과가 앞에 오도록 순서를 정하기 위해 버블 정렬을 사용해서 구현했다.
+
+```python
+def solution(numbers):
+    for i in range(len(numbers)):
+        numbers[i] = str(numbers[i])
+
+    for i in range(len(numbers) - 1):
+        for j in range(len(numbers) - 1 - i):
+            if numbers[j] + numbers[j + 1] < numbers[j + 1] + numbers[j]:
+                numbers[j], numbers[j + 1] = numbers[j + 1], numbers[j]
+
+    answer = ''.join(numbers)
+    return '0' if answer[0] == '0' else answer
+```
+
+이 코드로 대부분의 테스트 케이스는 통과했지만 버블 정렬의 시간복잡도가 `O(n^2)`으로 매우 크기 때문인지 입력 크기가 커질 경우 시간 초과가 발생했다.
+
+그래서 버블 정렬은 사용하지 않고 `sort()`를 사용하기로 했다.
+
+그리고 숫자를 문자열로 바꾸는 첫 줄의 코드도 바꿨다. 
+
+```python
+numbers = list(map(str, numbers))
+```
+
+그 다음 각 문자열을 반복한 값을 정렬 기준으로 사용했다.
+
+```python
+numbers.sort(key=lambda x: x * 3, reverse=True)
+```
+
+만약 `numbers`가
+
+```text
+["3", "30", "34"]
+```
+
+라면 `key`는 다음과 같이 만들어진다.
+
+```text
+"3"  * 3  -> "333"
+"30" * 3  -> "303030"
+"34" * 3  -> "343434"
+```
+
+이를 내림차순으로 정렬하면
+
+```text
+34 -> 3 -> 30
+```
+
+순서가 되고, 최종적으로 가장 큰 수를 만들 수 있다.
+
+정렬이 끝난 뒤에는 `join()`을 이용해 하나의 문자열로 합쳤다.
+
+```python
+answer = ''.join(numbers)
+```
+
+단, 첫 번째 문자가 `"0"`인 경우는 모든 숫자가 `0`인 경우 밖에 없으므로 `"000"` 출력을 방지하기 위해
+`"0"` 하나만 반환하도록 처리했다.
+
+### Code
+
+```python
+def solution(numbers):
+    numbers = list(map(str, numbers))
+    numbers.sort(key=lambda x: x * 3, reverse=True)
+    answer = ''.join(numbers)
+    return '0' if answer[0] == '0' else answer
+```
+
+### 시간복잡도
+
+먼저
+
+```python
+list(map(str, numbers))
+```
+
+를 통해 `n`개의 숫자를 문자열로 변환하므로 `O(n)`이 필요하다.
+
+
+```python
+numbers.sort(...)
+```
+
+를 수행하므로 정렬에 `O(n log n)`이 필요하다.
+
+이후 `join()`으로 모든 문자열을 합치는 데 `O(n)`이 필요하고,
+첫 번째 문자 확인은 `O(1)`이다.
+
+따라서 전체 시간복잡도는
+
+`O(n) + O(n log n) + O(n)`
+
+이므로
+
+`O(n log n)`
+
+### 공간복잡도
+
+숫자들을 문자열로 변환한 리스트를 저장하고,
+정렬 과정에서 보조 메모리를 사용하며,
+최종 결과 문자열도 생성한다.
+
+모두 입력 크기 `n`에 비례하므로 추가 공간복잡도는
+
+`O(n)`
+
+이다.
+
+### 배운 점
+
+처음 구현한 버블 정렬은 비교 기준 자체는 맞았지만,
+정렬 알고리즘의 시간복잡도가 `O(n^2)`이라서 입력이 커질 경우 비효율적이었다.
+
+따라서 올바른 비교 기준을 만들었다고 해서 항상 충분한 것은 아니고,
+그 기준을 어떤 정렬 알고리즘에 적용하는지도 중요하다는 점을 확인했다.
+
+또한 길이가 서로 다른 숫자 문자열을 정렬할 때
+문자열을 반복한 값을 `key`로 사용하면
+숫자를 이어 붙였을 때 더 큰 결과가 나오도록 정렬할 수 있다는 점을 배웠다.
+
+이번 문제에서는 버블 정렬에서 사용했던 비교 방식을
+`sort()`에 맞게 바꾸면서
+시간복잡도를 `O(n^2)`에서 `O(n log n)`으로 줄일 수 있었다.
+
+---
