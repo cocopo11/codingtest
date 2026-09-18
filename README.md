@@ -32,7 +32,7 @@ codingtest/
 | Level   | Solved |
 | ------- | -----: |
 | Level 1 |     11 |
-| Level 2 |      5 |
+| Level 2 |      6 |
 
 ## Commit 규칙
 
