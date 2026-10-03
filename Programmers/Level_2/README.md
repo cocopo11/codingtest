@@ -837,3 +837,187 @@ iterator 형태로 하나씩 생성한다.
 모든 방문 순서를 간단하게 확인할 수 있다.
 
 ---
+
+## 9. 소수 찾기
+
+### 문제 접근
+
+주어진 숫자 문자열의 각 숫자를 이용해 만들 수 있는 모든 숫자를 확인한 뒤,
+그 숫자가 소수인지 판별하는 방식으로 접근했다.
+
+먼저 소수 판별을 위한 `is_prime()` 함수를 따로 만들었다.
+
+```python
+def is_prime(n):
+    if n < 2:
+        return False
+
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+
+    return True
+```
+
+0과 1은 소수가 아니므로 먼저 제외하고
+
+그 다음 2부터 `sqrt(n)`까지 나누어보면서
+하나라도 나누어떨어지는 값이 있으면 소수가 아니라고 판단했다.
+
+어떤 수 `n`이 소수가 아니라면 약수는 항상 쌍으로 존재하므로,
+`sqrt(n)`까지만 확인해도 소수 여부를 판단할 수 있다.
+
+이후 `numbers`의 각 문자를 쪼개서 리스트로 만들었다.
+
+```python
+nmbr = [i for i in numbers]
+```
+
+그리고 한 자리 숫자부터 전체 길이까지
+모든 길이의 순열을 만들어야 하므로 다음과 같이 반복했다.
+
+```python
+for r in range(1, len(nmbr) + 1):
+    for i in permutations(nmbr, r):
+```
+
+만약 숫자가 3개라면
+
+```text
+길이 1의 순열
+길이 2의 순열
+길이 3의 순열
+```
+
+을 모두 확인하게 된다.
+
+각 순열은 문자 튜플 형태이므로
+먼저 하나의 문자열로 합친 뒤 정수로 변환했다.
+
+```python
+k = int(''.join(list(i)))
+```
+
+이렇게 하면 `011` 처럼 앞에 0이 붙은 경우도 자동으로 정수로 변환된다.
+
+생성한 숫자가 소수라면 `temp`에 저장하되, 같은 숫자가 여러 순열에서 만들어질 수 있기 때문에 
+먼저 `temp`에 들어 있는 숫자인지 확인한 뒤 중복되지 않은 경우에만 추가했다.
+
+```python
+if is_prime(k):
+    if k not in temp:
+        temp.append(k)
+```
+
+모든 순열을 확인한 뒤
+`temp`에 들어 있는 소수의 개수를 반환했다.
+
+### Code
+
+```python
+from itertools import permutations
+
+def is_prime(n):
+    if n < 2:
+        return False
+
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+
+    return True
+
+def solution(numbers):
+    nmbr = [i for i in numbers]
+    temp = []
+
+    for r in range(1, len(nmbr) + 1):
+        for i in permutations(nmbr, r):
+            k = int(''.join(list(i)))
+
+            if is_prime(k):
+                if k not in temp:
+                    temp.append(k)
+            else:
+                continue
+
+    return len(temp)
+```
+
+### 시간복잡도
+
+`numbers`의 길이를 `n`이라고 할 때 
+
+길이 1부터 `n`까지 생성되는 순열의 개수는
+
+```text
+P(n, 1) + P(n, 2) + ... + P(n, n)
+```
+
+이다.
+
+가장 큰 항은 `n!`이므로
+전체 순열 생성 규모는 대략 `O(n!)`로 볼 수 있다.
+
+각 순열에서 만든 숫자를 `k`라고 하면,
+소수 판별 함수 `is_prime(k)`는
+2부터 `sqrt(k)`까지 확인하므로
+
+```text
+O(sqrt(k))
+```
+
+의 시간이 필요하다.
+
+따라서 전체 시간복잡도는
+
+```text
+O(n! * sqrt(k))
+```
+
+규모의 완전탐색으로 볼 수 있다.
+
+또한 소수로 판별된 숫자가 이미 `temp`에 존재하는지 확인할 때
+
+```python
+k not in temp
+```
+
+를 사용하므로,
+현재 저장된 소수의 개수를 `m`이라고 하면
+중복 확인에 최대 `O(m)`이 추가로 필요할 수 있다.
+
+### 공간복잡도
+
+`permutations()`는 모든 순열을 한꺼번에 저장하지 않고
+하나씩 생성한다.
+
+다만 소수들을 `temp` 리스트에 저장하므로,
+찾은 소수의 개수를 `m`이라고 하면
+
+```text
+O(m)
+```
+
+의 추가 공간이 필요하다.
+
+### 배운 점
+
+입력으로 주어진 숫자들을 이용해 만들 수 있는 모든 경우를 확인해야 할 때
+`itertools.permutations()`를 이용하면
+직접 순열 생성 로직을 구현하지 않고도 모든 순서를 확인할 수 있다.
+
+또한 한 자리 숫자부터 전체 길이까지 모두 확인해야 하므로
+
+```python
+for r in range(1, len(nmbr) + 1):
+```
+
+처럼 순열의 길이를 바꿔가며 탐색할 수 있다.
+
+소수 판별에서는 모든 수를 끝까지 나눠볼 필요 없이
+약수의 대칭성을 이용해 `sqrt(n)`까지만 확인하면
+더 효율적으로 판별할 수 있다는 점도 활용했다.
+
+---
+
