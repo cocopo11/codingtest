@@ -1021,3 +1021,205 @@ for r in range(1, len(nmbr) + 1):
 
 ---
 
+## 10. 퍼즐 게임 챌린지
+
+### 문제 접근
+
+숙련도 `n`이 주어졌을 때 제한 시간 `limit` 안에 모든 퍼즐을 풀 수 있는지를 판별하고,
+그 결과를 이용해 가능한 최소 숙련도를 찾는 방식으로 접근했다.
+
+숙련도가 높아질수록 필요한 시간은 줄어들기 때문에
+특정 숙련도에서 제한 시간 안에 모든 퍼즐을 풀 수 있다면
+그보다 높은 숙련도에서도 무조건 해결할 수 있다.
+
+따라서 판정 결과가
+
+```text
+False False False ... True True True ...
+```
+
+처럼 단조롭게 변하므로 파라메트릭 서치를 적용하기로 했다. 
+
+### 가능 여부 판정
+
+```python
+def is_possible(n, diffs, times, limit):
+    time = times[0]
+
+    for i in range(1, len(diffs)):
+        if n < diffs[i]:
+            time += ((diffs[i] - n) * (times[i-1] + times[i]) + times[i])
+        else:
+            time += times[i]
+
+        if time > limit:
+            return False
+
+    return True
+```
+
+첫 번째 퍼즐은 조건상 무조건 성공하기 때문에 처음부터 `times[0]`을 더한다.
+
+현재 숙련도 `n`이 퍼즐 난이도 `diffs[i]` 이상이라면 실패 없이 한 번에 풀 수 있으므로
+`times[i]`만 더한다.
+
+반대로 숙련도가 난이도보다 작다면 실패 횟수는
+
+```text
+diffs[i] - n
+```
+
+이 된다.
+
+한 번 실패할 때마다 현재 퍼즐 풀이 시간과 이전 퍼즐의 풀이 시간이 필요하므로
+
+```text
+times[i-1] + times[i]
+```
+
+만큼의 시간이 추가된다.
+
+그리고 실패를 모두 끝낸 뒤 현재 퍼즐을 마지막으로 한 번 더 풀어야 하므로
+`times[i]`를 추가한다.
+
+따라서 필요한 시간은
+
+```python
+(diffs[i] - n) * (times[i-1] + times[i]) + times[i]
+```
+
+가 된다.
+
+누적 시간이 이미 `limit`을 초과했다면 이후 퍼즐을 더 확인할 필요가 없으므로
+즉시 `False`를 반환하고,
+끝까지 제한 시간을 넘지 않았다면 `True`를 반환한다.
+
+### 파라메트릭 서치
+
+숙련도의 최소값은 `1`,
+최대값은 `max(diffs)`로 두었다.
+
+```python
+start = 1
+end = max(diffs)
+```
+
+탐색 구간의 중간값 `mid`를 숙련도 후보로 두고
+`is_possible(mid, ...)`로 제한 시간 안에 풀 수 있는지 확인했다.
+
+현재 숙련도로 해결할 수 있다면
+더 작은 숙련도에서도 가능한지 확인해야 하므로
+일단 정답 후보로 저장하고 왼쪽 구간을 탐색한다.
+
+```python
+answer = mid
+end = mid - 1
+```
+
+반대로 해결할 수 없다면 숙련도를 더 높여야 하므로
+오른쪽 구간을 탐색한다.
+
+```python
+start = mid + 1
+```
+
+이 과정을 반복하다보면 처음으로 `True`가 되는 가장 작은 숙련도를 찾을 수 있다.
+
+### Code
+
+```python
+def is_possible(n, diffs, times, limit):
+    time = times[0]
+    for i in range(1,len(diffs)):
+        if n < diffs[i]:
+            time += ((diffs[i]-n)*(times[i-1]+times[i])+times[i])
+        else:
+            time += times[i]
+        if time > limit:
+            return False
+    return True
+
+def solution(diffs, times, limit):
+    answer = 0
+    start = 1
+    end = max(diffs) 
+
+    while start <= end:
+        mid = (start + end) // 2
+
+        if is_possible(mid, diffs, times, limit):
+            end = mid - 1
+            answer = mid 
+        else:
+            start = mid + 1
+    return answer
+```
+
+### 시간복잡도
+
+퍼즐의 개수를 `N`,
+가장 큰 난이도를 `D = max(diffs)`라고 할 때,
+
+`is_possible()`은 퍼즐을 한 번 순회하므로
+
+```text
+O(N)
+```
+
+의 시간이 필요하다.
+
+숙련도 범위 `1 ~ D`에서 이진 탐색을 수행하므로
+판정 함수는 최대
+
+```text
+O(log D)
+```
+
+번 호출된다.
+
+따라서 전체 시간복잡도는
+
+```text
+O(N log D)
+```
+
+이다.
+
+### 공간복잡도
+
+입력 크기에 비례하는 별도의 자료구조를 만들지 않고
+상수 개수의 변수만 사용하므로 추가 공간복잡도는
+
+```text
+O(1)
+```
+
+이다.
+
+### 배운 점
+
+이 문제는 정답 자체를 직접 계산하기보다
+
+```text
+숙련도 n으로 제한 시간 안에 모든 퍼즐을 풀 수 있는가?
+```
+
+라는 결정 문제로 바꿔서 접근할 수 있다.
+
+숙련도가 증가하더라도 성공 가능성이 낮아질 일이 없기 때문에
+판정 결과가 단조성을 가지며, 이를 이용해 파라메트릭 서치를 적용할 수 있다.
+
+또한 가능한 숙련도를 하나 찾는 것이 아니라
+처음으로 조건을 만족하는 최소값을 찾아야 하므로,
+조건을 만족했을 때도 탐색을 끝내지 않고
+왼쪽 구간을 계속 확인하는 방식으로 구현했다.
+
+이번 문제를 통해
+
+```text
+판정 함수 작성
+→ 단조성 확인
+→ 이진 탐색으로 최소 True 지점 찾기
+```
+
+형태의 파라메트릭 서치 패턴을 공부한 것을 실제 문제에 적용할 수 있었다.
